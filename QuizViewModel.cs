@@ -46,7 +46,14 @@ namespace QuizApp
         }
 
         public string Question => CurrentQuestion.Question;
-        public ObservableCollection<QuizAnswer> PotentialAnswers => CurrentQuestion.PotentialAnswers;
+        public ObservableCollection<QuizAnswer> PotentialAnswers
+        {
+            get
+            {
+                return CurrentQuestion?.PotentialAnswers;
+            }
+        }
+
 
         private string _selectedAnswer;
         public string SelectedAnswer
