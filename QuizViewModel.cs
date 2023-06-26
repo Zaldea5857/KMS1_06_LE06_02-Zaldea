@@ -1,72 +1,42 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows.Media;
+using System.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace QuizApp
 {
     public class QuizViewModel : INotifyPropertyChanged
     {
+        private int _currentQuestionIndex = 0;
+
+        public QuizQuestion CurrentQuestion => _questions[_currentQuestionIndex];
+
         private List<QuizQuestion> _questions = new List<QuizQuestion>
-    {
-        new QuizQuestion
         {
-            Question = "What keyword is used to create an instance of a class?",
-            PotentialAnswers = new ObservableCollection<QuizAnswer>
+            new QuizQuestion
             {
-                new QuizAnswer { Answer = "class", IsCorrect = false },
-                new QuizAnswer { Answer = "new", IsCorrect = true },
-                new QuizAnswer { Answer = "this", IsCorrect = false }
-            }
-        },
-        new QuizQuestion
-        {
-            Question = "What symbol is used to denote the start of a block of code?",
-            PotentialAnswers = new ObservableCollection<QuizAnswer>
+                Question = "What keyword is used to create an instance of a class?",
+                PotentialAnswers = new ObservableCollection<QuizAnswer>
+                {
+                    new QuizAnswer { Answer = "class", IsCorrect = false },
+                    new QuizAnswer { Answer = "new", IsCorrect = true },
+                    new QuizAnswer { Answer = "this", IsCorrect = false }
+                }
+            },
+            new QuizQuestion
             {
-                new QuizAnswer { Answer = "(", IsCorrect = false },
-                new QuizAnswer { Answer = "{", IsCorrect = true },
-                new QuizAnswer { Answer = "[", IsCorrect = false }
+                Question = "What symbol is used to denote the start of a block of code?",
+                PotentialAnswers = new ObservableCollection<QuizAnswer>
+                {
+                    new QuizAnswer { Answer = "(", IsCorrect = false },
+                    new QuizAnswer { Answer = "{", IsCorrect = true },
+                    new QuizAnswer { Answer = "[", IsCorrect = false }
+                }
             }
-        }
-    };
+        };
 
-        private QuizQuestion _currentQuestion;
-        public QuizQuestion CurrentQuestion
-        {
-            get { return _currentQuestion; }
-            set
-            {
-                _currentQuestion = value;
-                OnPropertyChanged(nameof(CurrentQuestion));
-                OnPropertyChanged(nameof(Question));
-                OnPropertyChanged(nameof(PotentialAnswers));
-            }
-        }
-
-        public string Question => CurrentQuestion.Question;
-        public ObservableCollection<QuizAnswer> PotentialAnswers
-        {
-            get
-            {
-                return CurrentQuestion?.PotentialAnswers;
-            }
-        }
-
-
-        private string _selectedAnswer;
-        public string SelectedAnswer
-        {
-            get { return _selectedAnswer; }
-            set
-            {
-                _selectedAnswer = value;
-                OnPropertyChanged(nameof(SelectedAnswer));
-            }
-        }
-
-        private string _resultMessage;
+        private string _resultMessage = "";
         public string ResultMessage
         {
             get { return _resultMessage; }
@@ -77,7 +47,7 @@ namespace QuizApp
             }
         }
 
-        private SolidColorBrush _resultColor;
+        private SolidColorBrush _resultColor = Brushes.Black;
         public SolidColorBrush ResultColor
         {
             get { return _resultColor; }
@@ -88,36 +58,59 @@ namespace QuizApp
             }
         }
 
-        private bool _isFinished;
-        public bool IsFinished
-        {
-            get { return _isFinished; }
-            set
-            {
-                _isFinished = value;
-                OnPropertyChanged(nameof(IsFinished));
-            }
-        }
-
-        public QuizViewModel()
-        {
-            CurrentQuestion = _questions[0];
-        }
-
         public void CheckAnswer()
         {
-            QuizAnswer selectedAnswer = CurrentQuestion.PotentialAnswers.FirstOrDefault(a => a.Answer == SelectedAnswer);
-            if (selectedAnswer != null && selectedAnswer.IsCorrect)
+            QuizAnswer selectedAnswer = CurrentQuestion.PotentialAnswers.FirstOrDefault(a => a.IsSelected);
+
+            if (selectedAnswer != null)
             {
-                ResultMessage = "Correct!";
-                ResultColor = Brushes.Green;
+                if (selectedAnswer.IsCorrect)
+                {
+                    ResultMessage = "Correct!";
+                    ResultColor = Brushes.Green;
+                }
+                else
+                {
+                    ResultMessage = "Incorrect!";
+                    ResultColor = Brushes.Red;
+                }
             }
             else
             {
-                ResultMessage = "Incorrect!";
-                ResultColor = Brushes.Red;
+                ResultMessage = "No answer selected!";
+                ResultColor = Brushes.Orange;
             }
-            IsFinished = true;
+        }
+
+        public void NextQuestion()
+        {
+            if (_currentQuestionIndex < _questions.Count - 1)
+            {
+                _currentQuestionIndex++;
+                OnPropertyChanged(nameof(CurrentQuestion));
+            }
+
+            foreach (QuizAnswer answer in CurrentQuestion.PotentialAnswers)
+            {
+                answer.IsSelected = false;
+            }
+
+            ResultMessage = "";
+            ResultColor = Brushes.Black;
+        }
+
+        public void RestartQuiz()
+        {
+            _currentQuestionIndex = 0;
+            OnPropertyChanged(nameof(CurrentQuestion));
+
+            foreach (QuizAnswer answer in CurrentQuestion.PotentialAnswers)
+            {
+                answer.IsSelected = false;
+            }
+
+            ResultMessage = "";
+            ResultColor = Brushes.Black;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

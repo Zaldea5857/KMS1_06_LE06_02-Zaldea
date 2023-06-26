@@ -17,12 +17,12 @@ namespace QuizApp
 
         private void OnNextQuestionClick(object sender, RoutedEventArgs e)
         {
-            // Add logic to move to next question
+            (DataContext as QuizViewModel).NextQuestion();
         }
 
         private void OnRestartQuizClick(object sender, RoutedEventArgs e)
         {
-            // Add logic to restart the quiz
+            (DataContext as QuizViewModel).RestartQuiz();
         }
     }
 }
